@@ -37,7 +37,17 @@ router.post("/login", async (req, res) => {
 });
 
 router.get("/logout", (req, res) => {
-  res.status(204).json({ message: "silly response" });
+  if (req.session && req.session.user) {
+    req.session.destroy((err) => {
+      if (err) {
+        res.json("you can not leave LOL");
+      } else {
+        res.json("sad to see you go!");
+      }
+    });
+  } else {
+    res.json("you probably shouldnt have access to the logout button");
+  }
 });
 
 router.get("/users", protected, (req, res) => {
