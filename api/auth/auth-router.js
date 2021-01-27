@@ -2,6 +2,7 @@ const express = require("express");
 const Users = require("../users/users-model");
 const bcrypt = require("bcryptjs");
 const router = express.Router();
+const protected = require("./auth-middleware");
 
 router.post("/register", (req, res) => {
   const { username, password } = req.body;
@@ -21,10 +22,11 @@ router.post("/register", (req, res) => {
 
 router.post("/login", async (req, res) => {
   const { username, password } = req.body;
-
   try {
     const allegedUser = await Users.findBy({ username }).first();
     if (allegedUser && bcrypt.compareSync(password, allegedUser.password)) {
+      req.session.user = allegedUser;
+      console.log(req.session);
       res.json("welcome back baybeee");
     } else {
       res.status(401).json("invalid credentials");
@@ -38,8 +40,14 @@ router.get("/logout", (req, res) => {
   res.status(204).json({ message: "silly response" });
 });
 
-router.get("/users", (req, res) => {
-  res.status(200).json({ message: "so silly response" });
+router.get("/users", protected, (req, res) => {
+  Users.find()
+    .then((users) => {
+      res.status(200).json(users);
+    })
+    .catch((err) => {
+      res.send(err);
+    });
 });
 
 module.exports = router;
