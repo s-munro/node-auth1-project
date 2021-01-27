@@ -19,12 +19,27 @@ router.post("/register", (req, res) => {
   }
 });
 
-router.post("/login", (req, res) => {
-  res.status(200).json({ message: "silly response" });
+router.post("/login", async (req, res) => {
+  const { username, password } = req.body;
+
+  try {
+    const allegedUser = await Users.findBy({ username }).first();
+    if (allegedUser && bcrypt.compareSync(password, allegedUser.password)) {
+      res.json("welcome back baybeee");
+    } else {
+      res.status(401).json("invalid credentials");
+    }
+  } catch (err) {
+    res.status(500).json(err.message);
+  }
 });
 
 router.get("/logout", (req, res) => {
   res.status(204).json({ message: "silly response" });
+});
+
+router.get("/users", (req, res) => {
+  res.status(200).json({ message: "so silly response" });
 });
 
 module.exports = router;
